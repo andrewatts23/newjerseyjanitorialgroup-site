@@ -1,0 +1,67 @@
+const track = document.getElementById("sliderTrack");
+const dots = document.querySelectorAll(".dot");
+const slides = document.querySelectorAll(".slide");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const reveals = document.querySelectorAll(".reveal");
+const magneticEls = document.querySelectorAll(".magnetic");
+
+let currentIndex = 0;
+
+function updateSlider(index) {
+  if (!track || !slides.length) return;
+
+  currentIndex = index;
+  track.style.transform = `translateX(-${index * 100}%)`;
+
+  dots.forEach((dot, i) => {
+    dot.classList.toggle("active", i === index);
+  });
+}
+
+function nextSlide() {
+  updateSlider((currentIndex + 1) % slides.length);
+}
+
+function prevSlide() {
+  updateSlider((currentIndex - 1 + slides.length) % slides.length);
+}
+
+if (nextBtn) nextBtn.addEventListener("click", nextSlide);
+if (prevBtn) prevBtn.addEventListener("click", prevSlide);
+
+dots.forEach((dot) => {
+  dot.addEventListener("click", () => {
+    updateSlider(Number(dot.dataset.index));
+  });
+});
+
+if (slides.length > 1) {
+  setInterval(nextSlide, 6500);
+}
+
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add("visible");
+    });
+  },
+  { threshold: 0.12 }
+);
+
+reveals.forEach((el) => observer.observe(el));
+
+magneticEls.forEach((el) => {
+  el.addEventListener("mousemove", (e) => {
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    el.style.transform = `translate(${x * 0.03}px, ${y * 0.03}px)`;
+  });
+
+  el.addEventListener("mouseleave", () => {
+    el.style.transform = "translate(0, 0)";
+  });
+});
+
+updateSlider(0);
